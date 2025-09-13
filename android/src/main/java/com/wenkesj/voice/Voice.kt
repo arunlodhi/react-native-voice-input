@@ -456,7 +456,7 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
   }
 
   // ActivityEventListener methods
-  override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
+  override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
     if (requestCode == REQUEST_SPEECH_RECOGNIZER) {
       isRecognizing = false
       
@@ -510,7 +510,7 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
     }
   }
 
-  override fun onNewIntent(intent: Intent?) {
+  override fun onNewIntent(intent: Intent) {
     // Not needed for speech recognition
   }
 }
