@@ -658,7 +658,7 @@ RCT_EXPORT_METHOD(startTranscription
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params
 {
-    return std::make_shared<facebook::react::NativeVoiceIOSSpecJSI>(params);
+    return std::make_shared<facebook::react::NativeVoiceSpecJSI>(params);
 }
 #endif
 

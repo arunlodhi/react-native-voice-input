@@ -6,7 +6,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 
 abstract class VoiceSpec internal constructor(context: ReactApplicationContext) :
-  NativeVoiceAndroidSpec(context) {
+  NativeVoiceSpec(context) {
   private val voice = Voice(context)
 
   override fun destroySpeech(callback: Callback) {
@@ -14,7 +14,7 @@ abstract class VoiceSpec internal constructor(context: ReactApplicationContext) 
   }
 
   override fun startSpeech(locale: String, opts: ReadableMap, callback: Callback) {
-    voice.startSpeech(locale,opts,callback)
+    voice.startSpeech(locale, opts, callback)
   }
 
   override fun stopSpeech(callback: Callback) {
@@ -37,15 +37,31 @@ abstract class VoiceSpec internal constructor(context: ReactApplicationContext) 
     voice.isRecognizing(callback)
   }
 
-  override fun addListener(eventType: String) {
+  override fun destroyTranscription(callback: Callback) {
+    voice.destroyTranscription(callback)
+  }
 
+  override fun startTranscription(url: String, locale: String, opts: ReadableMap, callback: Callback) {
+    voice.startTranscription(url, locale, opts, callback)
+  }
+
+  override fun stopTranscription(callback: Callback) {
+    voice.stopTranscription(callback)
+  }
+
+  override fun cancelTranscription(callback: Callback) {
+    voice.cancelTranscription(callback)
+  }
+
+  override fun addListener(eventType: String) {
+    // Event emitter methods - handled by React Native
   }
 
   override fun removeListeners(count: Double) {
-
+    // Event emitter methods - handled by React Native
   }
 
-    override fun getName(): String {
+  override fun getName(): String {
     return NAME
   }
 

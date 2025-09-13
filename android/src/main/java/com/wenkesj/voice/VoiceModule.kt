@@ -45,12 +45,32 @@ class VoiceModule internal constructor(context: ReactApplicationContext) :
     voice.isRecognizing(callback)
   }
 
-  override fun addListener(eventType: String) {
+  @ReactMethod
+  override fun destroyTranscription(callback: Callback) {
+    voice.destroyTranscription(callback)
+  }
 
+  @ReactMethod
+  override fun startTranscription(url: String, locale: String, opts: ReadableMap, callback: Callback) {
+    voice.startTranscription(url, locale, opts, callback)
+  }
+
+  @ReactMethod
+  override fun stopTranscription(callback: Callback) {
+    voice.stopTranscription(callback)
+  }
+
+  @ReactMethod
+  override fun cancelTranscription(callback: Callback) {
+    voice.cancelTranscription(callback)
+  }
+
+  override fun addListener(eventType: String) {
+    // Event emitter methods - handled by React Native
   }
 
   override fun removeListeners(count: Double) {
-
+    // Event emitter methods - handled by React Native
   }
 
   override fun getName(): String {

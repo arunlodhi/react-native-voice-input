@@ -3,8 +3,7 @@
 #ifdef RCT_NEW_ARCH_ENABLED
 #import "RNVoiceSpec.h"
 
-
-@interface Voice : RCTEventEmitter <NativeVoiceIOSSpec>
+@interface Voice : RCTEventEmitter <NativeVoiceSpec>
 #else
 #import <React/RCTBridgeModule.h>
 

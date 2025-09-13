@@ -10,21 +10,29 @@ import com.facebook.react.bridge.ReadableMap
 abstract class VoiceSpec internal constructor(context: ReactApplicationContext) :
   ReactContextBaseJavaModule(context) {
 
-  abstract fun destroySpeech(callback:Callback)
+  abstract fun destroySpeech(callback: Callback)
 
-  abstract fun startSpeech(locale:String, opts:ReadableMap, callback:Callback)
+  abstract fun startSpeech(locale: String, opts: ReadableMap, callback: Callback)
 
-  abstract fun stopSpeech(callback:Callback)
+  abstract fun stopSpeech(callback: Callback)
 
-  abstract fun cancelSpeech(callback:Callback)
+  abstract fun cancelSpeech(callback: Callback)
 
-  abstract fun isSpeechAvailable(callback:Callback)
+  abstract fun isSpeechAvailable(callback: Callback)
 
   abstract fun getSpeechRecognitionServices(promise: Promise)
 
-  abstract fun isRecognizing(callback:Callback)
+  abstract fun isRecognizing(callback: Callback)
 
-  abstract fun addListener(eventType:String)
+  abstract fun destroyTranscription(callback: Callback)
 
-  abstract fun removeListeners(count:Double)
+  abstract fun startTranscription(url: String, locale: String, opts: ReadableMap, callback: Callback)
+
+  abstract fun stopTranscription(callback: Callback)
+
+  abstract fun cancelTranscription(callback: Callback)
+
+  abstract fun addListener(eventType: String)
+
+  abstract fun removeListeners(count: Double)
 }

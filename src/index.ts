@@ -30,9 +30,7 @@ const LINKING_ERROR =
 const isTurboModuleEnabled = global.__turboModuleProxy != null;
 
 const VoiceNativeModule = isTurboModuleEnabled
-  ? Platform.OS === 'android'
-    ? require('./NativeVoiceAndroid').default
-    : require('./NativeVoiceIOS').default
+  ? require('./NativeVoice').default
   : NativeModules.Voice;
 
 const Voice = VoiceNativeModule
