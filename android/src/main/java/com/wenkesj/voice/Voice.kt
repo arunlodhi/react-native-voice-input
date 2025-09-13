@@ -190,10 +190,11 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
             speech?.destroy()
             speech = null
           }
-          pendingCallback = callback
+          // Don't store callback for UI mode - let the event system handle it
           startListeningWithUI(opts)
           isRecognizing = true
-          // Don't invoke callback here - wait for activity result
+          // Invoke callback immediately for UI mode to resolve the Promise
+          callback.invoke(false)
         } else {
           startListening(opts)
           isRecognizing = true
@@ -429,7 +430,6 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
   override fun onResults(results: Bundle?) {
     // Don't send results if we're in UI mode - activity result will handle it
     if (useUIMode) {
-      Log.d("ASR", "onResults() - skipping because UI mode is active")
       return
     }
     
@@ -444,7 +444,6 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
     val event = Arguments.createMap()
     event.putArray("value", arr)
     sendEvent("onSpeechResults", event)
-    Log.d("ASR", "onResults()")
   }
 
   override fun onPartialResults(partialResults: Bundle?) {
@@ -468,7 +467,7 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
 
   // ActivityEventListener methods
   override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
-    if (requestCode == REQUEST_SPEECH_RECOGNIZER) {
+    if (requestCode == REQUEST_SPEECH_RECOGNIZER && useUIMode) {
       isRecognizing = false
       
       when (resultCode) {
@@ -482,9 +481,6 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
             val event = Arguments.createMap()
             event.putArray("value", arr)
             sendEvent("onSpeechResults", event)
-            
-            // Don't invoke pendingCallback here - it causes double callback
-            // The Promise/callback resolution happens through the event system
           } else {
             val errorData = Arguments.createMap()
             errorData.putString("message", "No speech results")
