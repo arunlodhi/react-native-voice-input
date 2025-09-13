@@ -483,7 +483,8 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
             event.putArray("value", arr)
             sendEvent("onSpeechResults", event)
             
-            pendingCallback?.invoke(false)
+            // Don't invoke pendingCallback here - it causes double callback
+            // The Promise/callback resolution happens through the event system
           } else {
             val errorData = Arguments.createMap()
             errorData.putString("message", "No speech results")
@@ -491,8 +492,6 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
             val event = Arguments.createMap()
             event.putMap("error", errorData)
             sendEvent("onSpeechError", event)
-            
-            pendingCallback?.invoke("No speech results")
           }
         }
         Activity.RESULT_CANCELED -> {
@@ -502,8 +501,6 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
           val event = Arguments.createMap()
           event.putMap("error", errorData)
           sendEvent("onSpeechError", event)
-          
-          pendingCallback?.invoke("Speech recognition cancelled")
         }
         else -> {
           val errorData = Arguments.createMap()
@@ -512,8 +509,6 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
           val event = Arguments.createMap()
           event.putMap("error", errorData)
           sendEvent("onSpeechError", event)
-          
-          pendingCallback?.invoke("Speech recognition failed")
         }
       }
       
