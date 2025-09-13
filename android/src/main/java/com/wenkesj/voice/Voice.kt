@@ -185,6 +185,11 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
     mainHandler.post {
       try {
         if (useUIMode) {
+          // Clean up any existing speech recognizer when using UI mode
+          if (speech != null) {
+            speech?.destroy()
+            speech = null
+          }
           pendingCallback = callback
           startListeningWithUI(opts)
           isRecognizing = true
@@ -422,6 +427,12 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
   }
 
   override fun onResults(results: Bundle?) {
+    // Don't send results if we're in UI mode - activity result will handle it
+    if (useUIMode) {
+      Log.d("ASR", "onResults() - skipping because UI mode is active")
+      return
+    }
+    
     val arr = Arguments.createArray()
 
     val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
@@ -506,6 +517,8 @@ class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEvent
         }
       }
       
+      // Reset UI mode flag and clear callback
+      useUIMode = false
       pendingCallback = null
     }
   }
