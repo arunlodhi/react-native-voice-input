@@ -237,6 +237,55 @@ class Voice (context:ReactApplicationContext):RecognitionListener {
     callback.invoke(isRecognizing)
   }
 
+  // Transcription methods - placeholder implementations
+  fun destroyTranscription(callback: Callback) {
+    val mainHandler = Handler(reactContext.mainLooper)
+    mainHandler.post {
+      try {
+        // TODO: Implement transcription destroy logic
+        callback.invoke(false)
+      } catch (e: Exception) {
+        callback.invoke(e.message)
+      }
+    }
+  }
+
+  fun startTranscription(url: String, locale: String, opts: ReadableMap, callback: Callback) {
+    val mainHandler = Handler(reactContext.mainLooper)
+    mainHandler.post {
+      try {
+        // TODO: Implement transcription start logic
+        callback.invoke(false)
+      } catch (e: Exception) {
+        callback.invoke(e.message)
+      }
+    }
+  }
+
+  fun stopTranscription(callback: Callback) {
+    val mainHandler = Handler(reactContext.mainLooper)
+    mainHandler.post {
+      try {
+        // TODO: Implement transcription stop logic
+        callback.invoke(false)
+      } catch (e: Exception) {
+        callback.invoke(e.message)
+      }
+    }
+  }
+
+  fun cancelTranscription(callback: Callback) {
+    val mainHandler = Handler(reactContext.mainLooper)
+    mainHandler.post {
+      try {
+        // TODO: Implement transcription cancel logic
+        callback.invoke(false)
+      } catch (e: Exception) {
+        callback.invoke(e.message)
+      }
+    }
+  }
+
   private fun sendEvent(eventName: String, params: WritableMap) {
     reactContext
       .getJSModule(RCTDeviceEventEmitter::class.java)
