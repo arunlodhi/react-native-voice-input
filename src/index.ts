@@ -147,6 +147,7 @@ class RCTVoice {
               EXTRA_MAX_RESULTS: 5,
               EXTRA_PARTIAL_RESULTS: true,
               REQUEST_PERMISSIONS_AUTO: true,
+              SHOW_UI: false, // Default to programmatic mode
             },
             options,
           ),

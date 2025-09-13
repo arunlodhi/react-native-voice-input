@@ -2,6 +2,7 @@ package com.wenkesj.voice
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,6 +14,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.annotation.Nullable
+import com.facebook.react.bridge.ActivityEventListener
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Callback
 import com.facebook.react.bridge.Promise
@@ -24,11 +26,21 @@ import com.facebook.react.modules.core.PermissionAwareActivity
 import java.util.Locale
 
 
-class Voice (context:ReactApplicationContext):RecognitionListener {
+class Voice (context:ReactApplicationContext):RecognitionListener, ActivityEventListener {
   val reactContext: ReactApplicationContext = context
   private var speech: SpeechRecognizer? = null
   private var isRecognizing = false
   private var locale: String? = null
+  private var useUIMode = false
+  private var pendingCallback: Callback? = null
+  
+  companion object {
+    private const val REQUEST_SPEECH_RECOGNIZER = 1001
+  }
+
+  init {
+    reactContext.addActivityEventListener(this)
+  }
 
   private fun getLocale(locale: String?): String {
     if (locale != null && locale != "") {
@@ -120,15 +132,68 @@ class Voice (context:ReactApplicationContext):RecognitionListener {
     speech?.startListening(intent)
   }
 
+  private fun startListeningWithUI(opts: ReadableMap) {
+    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+    
+    // Load the intent with options from JS
+    val iterator = opts.keySetIterator()
+    while (iterator.hasNextKey()) {
+      val key = iterator.nextKey()
+      when (key) {
+        "EXTRA_LANGUAGE_MODEL" -> when (opts.getString(key)) {
+          "LANGUAGE_MODEL_FREE_FORM" -> intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+          )
+          "LANGUAGE_MODEL_WEB_SEARCH" -> intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH
+          )
+          else -> intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+          )
+        }
+        "EXTRA_MAX_RESULTS" -> {
+          val extras = opts.getDouble(key)
+          intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, extras.toInt())
+        }
+        "EXTRA_PROMPT" -> {
+          intent.putExtra(RecognizerIntent.EXTRA_PROMPT, opts.getString(key))
+        }
+      }
+    }
+
+    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, getLocale(this.locale))
+    
+    val currentActivity = reactContext.currentActivity
+    if (currentActivity != null) {
+      currentActivity.startActivityForResult(intent, REQUEST_SPEECH_RECOGNIZER)
+    } else {
+      pendingCallback?.invoke("No current activity available")
+      pendingCallback = null
+    }
+  }
+
   private fun startSpeechWithPermissions(locale: String, opts: ReadableMap, callback: Callback) {
     this.locale = locale
+    
+    // Check if UI mode is requested
+    useUIMode = opts.hasKey("SHOW_UI") && opts.getBoolean("SHOW_UI")
 
     val mainHandler = Handler(reactContext.mainLooper)
     mainHandler.post {
       try {
-        startListening(opts)
-        isRecognizing = true
-        callback.invoke(false)
+        if (useUIMode) {
+          pendingCallback = callback
+          startListeningWithUI(opts)
+          isRecognizing = true
+          // Don't invoke callback here - wait for activity result
+        } else {
+          startListening(opts)
+          isRecognizing = true
+          callback.invoke(false)
+        }
       } catch (e: Exception) {
         callback.invoke(e.message)
       }
@@ -388,5 +453,64 @@ class Voice (context:ReactApplicationContext):RecognitionListener {
 
   override fun onEvent(eventType: Int, params: Bundle?) {
     TODO("Not yet implemented")
+  }
+
+  // ActivityEventListener methods
+  override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
+    if (requestCode == REQUEST_SPEECH_RECOGNIZER) {
+      isRecognizing = false
+      
+      when (resultCode) {
+        Activity.RESULT_OK -> {
+          val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+          if (results != null && results.isNotEmpty()) {
+            val arr = Arguments.createArray()
+            for (result in results) {
+              arr.pushString(result)
+            }
+            val event = Arguments.createMap()
+            event.putArray("value", arr)
+            sendEvent("onSpeechResults", event)
+            
+            pendingCallback?.invoke(false)
+          } else {
+            val errorData = Arguments.createMap()
+            errorData.putString("message", "No speech results")
+            errorData.putString("code", "NO_RESULTS")
+            val event = Arguments.createMap()
+            event.putMap("error", errorData)
+            sendEvent("onSpeechError", event)
+            
+            pendingCallback?.invoke("No speech results")
+          }
+        }
+        Activity.RESULT_CANCELED -> {
+          val errorData = Arguments.createMap()
+          errorData.putString("message", "Speech recognition cancelled")
+          errorData.putString("code", "CANCELLED")
+          val event = Arguments.createMap()
+          event.putMap("error", errorData)
+          sendEvent("onSpeechError", event)
+          
+          pendingCallback?.invoke("Speech recognition cancelled")
+        }
+        else -> {
+          val errorData = Arguments.createMap()
+          errorData.putString("message", "Speech recognition failed")
+          errorData.putString("code", "FAILED")
+          val event = Arguments.createMap()
+          event.putMap("error", errorData)
+          sendEvent("onSpeechError", event)
+          
+          pendingCallback?.invoke("Speech recognition failed")
+        }
+      }
+      
+      pendingCallback = null
+    }
+  }
+
+  override fun onNewIntent(intent: Intent?) {
+    // Not needed for speech recognition
   }
 }
