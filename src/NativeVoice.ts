@@ -9,6 +9,7 @@ export type SpeechOptions = {
   EXTRA_PARTIAL_RESULTS?: string;
   REQUEST_PERMISSIONS_AUTO?: string;
   RECOGNIZER_ENGINE?: string;
+  IOS_CONTINUOUS?: boolean;
 };
 
 export interface Spec extends TurboModule {

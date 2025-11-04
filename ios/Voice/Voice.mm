@@ -617,16 +617,25 @@ RCT_EXPORT_METHOD(isRecognizing : (RCTResponseSenderBlock)callback) {
 - (void)startSpeech:(NSString *)locale
                opts:(JS::NativeVoice::SpeechOptions &)opts
            callback:(RCTResponseSenderBlock)callback {
+  NSDictionary *options = @{};
 #else
 RCT_EXPORT_METHOD(startSpeech
                  : (NSString *)locale opts
                  : (NSDictionary *)opts callback
                  : (RCTResponseSenderBlock)callback) {
+  NSDictionary *options = opts;
 #endif
  if (self.recognitionTask != nil) {
    [self sendResult:RCTMakeError(@"Speech recognition already started!", nil,
                                  nil):nil:nil:nil];
    return;
+ }
+
+ // Set continuous mode from options
+ if (options[@"IOS_CONTINUOUS"]) {
+   self.continuous = [options[@"IOS_CONTINUOUS"] boolValue];
+ } else {
+   self.continuous = NO;
  }
 
  [SFSpeechRecognizer requestAuthorization:^(
