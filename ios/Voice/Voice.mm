@@ -524,37 +524,65 @@
   }
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)stopSpeech:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(stopSpeech : (RCTResponseSenderBlock)callback) {
+#endif
   [self.recognitionTask finish];
   callback(@[ @false ]);
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)stopTranscription:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(stopTranscription : (RCTResponseSenderBlock)callback) {
+#endif
   [self.recognitionTask finish];
   callback(@[ @false ]);
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)cancelSpeech:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(cancelSpeech : (RCTResponseSenderBlock)callback) {
+#endif
   [self.recognitionTask cancel];
   callback(@[ @false ]);
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)cancelTranscription:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(cancelTranscription : (RCTResponseSenderBlock)callback) {
+#endif
   [self.recognitionTask cancel];
   callback(@[ @false ]);
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)destroySpeech:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(destroySpeech : (RCTResponseSenderBlock)callback) {
+#endif
   [self teardown];
   callback(@[ @false ]);
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)destroyTranscription:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(destroyTranscription : (RCTResponseSenderBlock)callback) {
+#endif
   [self teardown];
   callback(@[ @false ]);
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)isSpeechAvailable:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(isSpeechAvailable : (RCTResponseSenderBlock)callback) {
+#endif
   [SFSpeechRecognizer
       requestAuthorization:^(SFSpeechRecognizerAuthorizationStatus status) {
     switch (status) {
@@ -566,7 +594,12 @@ RCT_EXPORT_METHOD(isSpeechAvailable : (RCTResponseSenderBlock)callback) {
     }
   }];
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)isRecognizing:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(isRecognizing : (RCTResponseSenderBlock)callback) {
+#endif
  if (self.recognitionTask != nil) {
    switch (self.recognitionTask.state) {
    case SFSpeechRecognitionTaskStateRunning:
@@ -580,10 +613,16 @@ RCT_EXPORT_METHOD(isRecognizing : (RCTResponseSenderBlock)callback) {
  }
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)startSpeech:(NSString *)locale
+               opts:(JS::NativeVoice::SpeechOptions &)opts
+           callback:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(startSpeech
-                 : (NSString *)localeStr opts
+                 : (NSString *)locale opts
                  : (NSDictionary *)opts callback
                  : (RCTResponseSenderBlock)callback) {
+#endif
  if (self.recognitionTask != nil) {
    [self sendResult:RCTMakeError(@"Speech recognition already started!", nil,
                                  nil):nil:nil:nil];
@@ -607,17 +646,24 @@ RCT_EXPORT_METHOD(startSpeech
                           nil):nil:nil:nil];
      break;
    case SFSpeechRecognizerAuthorizationStatusAuthorized:
-     [self setupAndStartRecognizing:localeStr];
+     [self setupAndStartRecognizing:locale];
      break;
    }
  }];
  callback(@[ @false ]);
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)startTranscription:(NSString *)url
+                    locale:(NSString *)locale
+                      opts:(NSDictionary *)opts
+                  callback:(RCTResponseSenderBlock)callback {
+#else
 RCT_EXPORT_METHOD(startTranscription
-                  : (NSString *)filePath withLocaleStr
-                  : (NSString *)localeStr callback
+                  : (NSString *)url withLocaleStr
+                  : (NSString *)locale callback
                   : (RCTResponseSenderBlock)callback) {
+#endif
   if (self.recognitionTask != nil) {
     [self sendResult:RCTMakeError(@"Speech recognition already started!", nil,
                                   nil):nil:nil:nil];
@@ -641,7 +687,7 @@ RCT_EXPORT_METHOD(startTranscription
                            nil):nil:nil:nil];
       break;
     case SFSpeechRecognizerAuthorizationStatusAuthorized:
-      [self setupAndTranscribeFile:filePath withLocaleStr:localeStr];
+      [self setupAndTranscribeFile:url withLocaleStr:locale];
       break;
     }
   }];
