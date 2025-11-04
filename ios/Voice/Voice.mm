@@ -291,6 +291,16 @@
 
  self.speechRecognizer.delegate = self;
 
+ // Check if speech recognizer is available
+ if (!self.speechRecognizer.isAvailable) {
+   [self sendResult:@{
+     @"code" : @"recognizer_not_available",
+     @"message" : @"Speech recognizer is not available for this locale"
+   }:nil:nil:nil];
+   [self teardown];
+   return;
+ }
+
  // Start audio session...
  if (![self setupAudioSession]) {
    [self teardown];
