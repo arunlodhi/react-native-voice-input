@@ -326,6 +326,7 @@ class RCTVoice {
   }
 }
 
+export type { SpeechOptions } from './NativeVoice';
 export type {
   SpeechEndEvent,
   SpeechErrorEvent,

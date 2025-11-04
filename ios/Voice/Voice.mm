@@ -581,7 +581,8 @@ RCT_EXPORT_METHOD(isRecognizing : (RCTResponseSenderBlock)callback) {
 }
 
 RCT_EXPORT_METHOD(startSpeech
-                 : (NSString *)localeStr callback
+                 : (NSString *)localeStr opts
+                 : (NSDictionary *)opts callback
                  : (RCTResponseSenderBlock)callback) {
  if (self.recognitionTask != nil) {
    [self sendResult:RCTMakeError(@"Speech recognition already started!", nil,
